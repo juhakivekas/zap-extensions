@@ -22,6 +22,7 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.parosproxy.paros.control.Control;
 import org.parosproxy.paros.extension.ExtensionAdaptor;
+import org.parosproxy.paros.extension.ExtensionHook;
 import org.parosproxy.paros.extension.history.ExtensionHistory;
 import org.parosproxy.paros.model.HistoryReference;
 import org.zaproxy.zap.view.table.DefaultHistoryReferencesTableModel;
@@ -29,16 +30,21 @@ import org.zaproxy.zap.view.table.DefaultHistoryReferencesTableModel;
 import java.awt.*;
 
 public class ExtensionNeonmarker extends ExtensionAdaptor {
+    private
 
     @Override
     public String getAuthor() {
         return "Juha Kivekäs";
     }
-    
-    public void hook(){
+
+    public ExtensionNeonmarker() {
+        super();
+    }
+
+    public void hook(ExtensionHook extensionHook){
         ExtensionHistory extHistory = (ExtensionHistory) Control.getSingleton().getExtensionLoader().getExtension(ExtensionHistory.NAME);
-        int idColumnIndex = extHistory.getLogPanel().getHistoryReferenceTable().getModel().getColumnIndex(DefaultHistoryReferencesTableModel.Column.HREF_ID);
-        extHistory.getLogPanel().getHistoryReferenceTable().setHighlighters(new MarkItemColorHighlighter(extHistory, idColumnIndex));
+        int idColumnIndex = extHistory.getLogPanelHistoryReferenceTable().getModel().getColumnIndex(DefaultHistoryReferencesTableModel.Column.HREF_ID);
+        extHistory.getLogPanelHistoryReferenceTable().setHighlighters(new MarkItemColorHighlighter(extHistory, idColumnIndex));
     }
 
     private class MarkItemColorHighlighter extends AbstractHighlighter {
@@ -57,11 +63,10 @@ public class ExtensionNeonmarker extends ExtensionAdaptor {
             HistoryReference ref = extHistory.getHistoryReference((int) adapter.getValue(idColumnIndex));
             try{
                 if(!ref.getTags().isEmpty()) {
-                    component.setBackground(new Color(0xDBD57C));
+                    component.setBackground(new Color(0x008EDB));
                 }
             }catch(Exception e){}
             return component;
         }
     }
 }
-

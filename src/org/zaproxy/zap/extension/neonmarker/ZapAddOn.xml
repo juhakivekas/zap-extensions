@@ -2,7 +2,7 @@
 	<name>Neonmarker</name>
 	<version>1</version>
 	<status>alpha</status>
-	<description>Adds colouring to history table based on tags. Emulates a highlighting marker.</description>
+	<description>Colors history table items based on tags</description>
 	<author>Juha Kivekäs</author>
 	<url></url>
 	<changes>
@@ -11,7 +11,7 @@
 	]]>
 	</changes>
 	<extensions>
-	    <extension>org.zaproxy.zap.extension.neonmarker.ExtensonNeonmarker</extension>
+	    <extension>org.zaproxy.zap.extension.neonmarker.ExtensionNeonmarker</extension>
 	</extensions>
 	<ascanrules>
 	</ascanrules>
