@@ -1,4 +1,5 @@
 #different tags can be coloured differently
+DONE
 
 # User can add Tag -> Color mapping in UI
 | Drop down of tags | Drop down of colours / colour code input field
@@ -11,7 +12,7 @@ drag and drop
 move up / move down arrows next to rule definitions
 
 # colour mappings can be added in scripts
-extNeonmarket.addColormapping("tag", 0xc06000)
+extNeonmarker.addColormapping("tag", 0xc06000)
 
 # user can add colour by regex
 UI configurable passive scanning rule
