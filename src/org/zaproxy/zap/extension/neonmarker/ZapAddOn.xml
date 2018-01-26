@@ -1,0 +1,24 @@
+<zapaddon>
+	<name>Neonmarker</name>
+	<version>1</version>
+	<status>alpha</status>
+	<description>Adds colouring to history table based on tags. Emulates a highlighting marker.</description>
+	<author>Juha Kivekäs</author>
+	<url></url>
+	<changes>
+	<![CDATA[
+		Initial laser version<br>
+	]]>
+	</changes>
+	<extensions>
+	    <extension>org.zaproxy.zap.extension.neonmarker.ExtensonNeonmarker</extension>
+	</extensions>
+	<ascanrules>
+	</ascanrules>
+	<pscanrules>
+	</pscanrules>
+	<filters/>
+	<files/>
+	<not-before-version>2.7.1</not-before-version>
+	<not-from-version></not-from-version>
+</zapaddon>

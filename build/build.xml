@@ -733,6 +733,10 @@
 		<generate-wiki-core addon="jxbrowser" />
 	</target>
 	
+	<target name="deploy-neonmarker">
+		<build-deploy-addon name="neonmarker" />
+	</target>
+
 	<target name="deploy-onlineMenu" description="deploy the online menu">
 		<build-deploy-addon name="onlineMenu" />
 	</target>
