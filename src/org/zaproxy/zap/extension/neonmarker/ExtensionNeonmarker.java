@@ -24,19 +24,40 @@ import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.parosproxy.paros.control.Control;
 import org.parosproxy.paros.extension.ExtensionAdaptor;
 import org.parosproxy.paros.extension.ExtensionHook;
+import org.parosproxy.paros.extension.ExtensionHookView;
 import org.parosproxy.paros.extension.history.ExtensionHistory;
 import org.parosproxy.paros.model.HistoryReference;
 import org.zaproxy.zap.view.table.DefaultHistoryReferencesTableModel;
 
-import java.awt.Color;
-import java.awt.Component;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 public class ExtensionNeonmarker extends ExtensionAdaptor {
     private static final Logger logger = Logger.getLogger(ExtensionNeonmarker.class);
-    private SortedMap<MappedTag, Color> colourmapping;
+    private ArrayList<ColorMapping> colormap;
+    private NeonmarkerPanel neonmarkerPanel;
+
+    public static Color[] palette = {
+            //RAINBOW HACKER THEME
+            new Color(0xff8080),
+            new Color(0xffc080),
+            new Color(0xffff80),
+            new Color(0xc0ff80),
+            new Color(0x80ff80),
+            new Color(0x80ffc0),
+            new Color(0x80ffff),
+            new Color(0x80c0ff),
+            new Color(0x8080ff),
+            new Color(0xc080ff),
+            new Color(0xff80ff),
+            new Color(0xff80c0),
+            //CORPORATE EDITION
+            new Color(0xc0ffff),
+            new Color(0x90c0c0),
+            new Color(0x608080),
+            new Color(0x304040)
+    };
 
     @Override
     public String getAuthor() {
@@ -51,11 +72,19 @@ public class ExtensionNeonmarker extends ExtensionAdaptor {
         ExtensionHistory extHistory = (ExtensionHistory) Control.getSingleton().getExtensionLoader().getExtension(ExtensionHistory.NAME);
         int idColumnIndex = extHistory.getLogPanelHistoryReferenceTable().getModel().getColumnIndex(DefaultHistoryReferencesTableModel.Column.HREF_ID);
         extHistory.getLogPanelHistoryReferenceTable().setHighlighters(new MarkItemColorHighlighter(extHistory, idColumnIndex));
-        //TODO make color mapping dynamically configurable from UI
-        colourmapping = new TreeMap<>();
-        colourmapping.put(new MappedTag("Comment", 1), new Color(0x93FF97));
-        colourmapping.put(new MappedTag("Script", 3), new Color(0xFFBBE4));
-        colourmapping.put(new MappedTag("foo", 5), new Color(0xF6FF74));
+
+        colormap = new ArrayList<ColorMapping>();
+
+        ExtensionHookView hookView = extensionHook.getHookView();
+        hookView.addStatusPanel(getNeonmarkerPanel());
+    }
+
+    public NeonmarkerPanel getNeonmarkerPanel() {
+        if (neonmarkerPanel == null) {
+            ExtensionHistory extHistory = (ExtensionHistory) Control.getSingleton().getExtensionLoader().getExtension(ExtensionHistory.NAME);
+            neonmarkerPanel = new NeonmarkerPanel(extHistory.getModel(), colormap);
+        }
+        return neonmarkerPanel;
     }
 
     private class MarkItemColorHighlighter extends AbstractHighlighter {
@@ -88,30 +117,22 @@ public class ExtensionNeonmarker extends ExtensionAdaptor {
         }
 
         private Color mapTagsToColor(List<String> tags) {
-            if (tags.isEmpty()) {
-                return null;
-            }
-            for (MappedTag mappedtag : colourmapping.keySet()) {
-                if (tags.contains(mappedtag.tag)) {
-                    return colourmapping.get(mappedtag);
+            for (ColorMapping colorMapping : colormap) {
+                if (tags.contains(colorMapping.tag)) {
+                    return colorMapping.color;
                 }
             }
             return null;
         }
     }
 
-    private class MappedTag implements Comparable {
+    public static class ColorMapping {
         private String tag;
-        private int order;
+        private Color color;
 
-        public MappedTag(String tag, int order) {
+        public ColorMapping(String tag, Color color) {
             this.tag = tag;
-            this.order = order;
-        }
-
-        @Override
-        public int compareTo(Object o) {
-            return order - ((MappedTag) o).order;
+            this.color = color;
         }
     }
 }
