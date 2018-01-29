@@ -38,7 +38,7 @@ public class ExtensionNeonmarker extends ExtensionAdaptor {
     private ArrayList<ColorMapping> colormap;
     private NeonmarkerPanel neonmarkerPanel;
 
-    public static Color[] palette = {
+    static Color[] palette = {
             //RAINBOW HACKER THEME
             new Color(0xff8080),
             new Color(0xffc080),
@@ -73,13 +73,13 @@ public class ExtensionNeonmarker extends ExtensionAdaptor {
         int idColumnIndex = extHistory.getHistoryReferenceTable().getModel().getColumnIndex(DefaultHistoryReferencesTableModel.Column.HREF_ID);
         extHistory.getHistoryReferenceTable().setHighlighters(new MarkItemColorHighlighter(extHistory, idColumnIndex));
 
-        colormap = new ArrayList<ColorMapping>();
+        colormap = new ArrayList<>();
 
         ExtensionHookView hookView = extensionHook.getHookView();
         hookView.addStatusPanel(getNeonmarkerPanel());
     }
 
-    public NeonmarkerPanel getNeonmarkerPanel() {
+    private NeonmarkerPanel getNeonmarkerPanel() {
         if (neonmarkerPanel == null) {
             ExtensionHistory extHistory = (ExtensionHistory) Control.getSingleton().getExtensionLoader().getExtension(ExtensionHistory.NAME);
             neonmarkerPanel = new NeonmarkerPanel(extHistory.getModel(), colormap);
@@ -91,7 +91,7 @@ public class ExtensionNeonmarker extends ExtensionAdaptor {
         private int idColumnIndex;
         private ExtensionHistory extHistory;
 
-        public MarkItemColorHighlighter(ExtensionHistory extHistory, int idColumnIndex) {
+        MarkItemColorHighlighter(ExtensionHistory extHistory, int idColumnIndex) {
             super();
             setHighlightPredicate(HighlightPredicate.ALWAYS);
             this.extHistory = extHistory;
@@ -126,11 +126,11 @@ public class ExtensionNeonmarker extends ExtensionAdaptor {
         }
     }
 
-    public static class ColorMapping {
+    static class ColorMapping {
         private String tag;
         private Color color;
 
-        public ColorMapping(String tag, Color color) {
+        ColorMapping(String tag, Color color) {
             this.tag = tag;
             this.color = color;
         }

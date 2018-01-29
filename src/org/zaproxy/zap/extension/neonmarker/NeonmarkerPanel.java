@@ -5,20 +5,21 @@ import org.parosproxy.paros.extension.AbstractPanel;
 import org.parosproxy.paros.model.Model;
 
 import javax.swing.*;
+import javax.swing.ImageIcon;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NeonmarkerPanel extends AbstractPanel {
-    public static final ImageIcon neonmarkerIcon;
+class NeonmarkerPanel extends AbstractPanel {
+    private static final ImageIcon neonmarkerIcon;
     private Model historyTableModel;
     private ArrayList<ExtensionNeonmarker.ColorMapping> colormap;
     private Container colorSelectionPanel;
-    private JScrollPane colorSelectionPanelScrollFrame;
     private JToolBar toolbar;
     private JButton clearButton, addButton;
 
@@ -26,8 +27,7 @@ public class NeonmarkerPanel extends AbstractPanel {
         neonmarkerIcon = new ImageIcon(NeonmarkerPanel.class.getResource("/org/zaproxy/zap/extension/neonmarker/resources/spectrum.png"));
     }
 
-
-    public NeonmarkerPanel(Model model, ArrayList<ExtensionNeonmarker.ColorMapping> colormap) {
+    NeonmarkerPanel(Model model, ArrayList<ExtensionNeonmarker.ColorMapping> colormap) {
         historyTableModel = model;
         this.colormap = colormap;
         initializePanel();
@@ -53,7 +53,7 @@ public class NeonmarkerPanel extends AbstractPanel {
 
         colorSelectionPanel = new JPanel();
         colorSelectionPanel.setLayout(new BoxLayout(colorSelectionPanel, BoxLayout.PAGE_AXIS));
-        colorSelectionPanelScrollFrame = new JScrollPane();
+        JScrollPane colorSelectionPanelScrollFrame = new JScrollPane();
         colorSelectionPanelScrollFrame.setPreferredSize(new Dimension(800, 300));
         colorSelectionPanelScrollFrame.setViewportView(colorSelectionPanel);
         add(colorSelectionPanelScrollFrame, constraints);
@@ -75,7 +75,7 @@ public class NeonmarkerPanel extends AbstractPanel {
 
     private Component getClearButton() {
         if (clearButton == null) {
-            clearButton = new JButton(/*make a label?*/);
+            clearButton = new JButton();
             clearButton.setEnabled(true);
             clearButton.setIcon(new ImageIcon(NeonmarkerPanel.class.getResource("/resource/icon/fugue/broom.png")));
             clearButton.setToolTipText(Constant.messages.getString("neonmarker.panel.button.clear"));
@@ -93,9 +93,7 @@ public class NeonmarkerPanel extends AbstractPanel {
             addButton.setEnabled(true);
             addButton.setIcon(new ImageIcon(NeonmarkerPanel.class.getResource("/resource/icon/16/103.png")));
             addButton.setToolTipText(Constant.messages.getString("neonmarker.panel.button.add"));
-            addButton.addActionListener(actionEvent -> {
-                colorSelectionPanel.add(new ColorMappingRow());
-            });
+            addButton.addActionListener(actionEvent -> colorSelectionPanel.add(new ColorMappingRow()));
         }
         return addButton;
     }
@@ -117,12 +115,13 @@ public class NeonmarkerPanel extends AbstractPanel {
     }
 
     private class ColorMappingRow extends JPanel {
-        public String selectedTag;
-        public Color selectedColor;
-        private JComboBox tagSelect, colorSelect;
+        String selectedTag;
+        Color selectedColor;
+        private JComboBox<String> tagSelect;
+        private JComboBox<Color> colorSelect;
         private JButton deleteButton;
 
-        public ColorMappingRow() {
+        ColorMappingRow() {
             setLayout(new FlowLayout(FlowLayout.LEFT));
             add(getDeleteButton());
             add(getTagSelect());
@@ -131,7 +130,7 @@ public class NeonmarkerPanel extends AbstractPanel {
 
         private Component getDeleteButton() {
             deleteButton = new JButton("");
-            deleteButton.setPreferredSize(new Dimension(30, 25));
+            deleteButton.setPreferredSize(new Dimension(30, 24));
             deleteButton.setEnabled(true);
             deleteButton.setIcon(new ImageIcon(NeonmarkerPanel.class.getResource("/resource/icon/16/104.png")));
             deleteButton.setToolTipText(Constant.messages.getString("neonmarker.panel.mapping.delete"));
@@ -145,8 +144,8 @@ public class NeonmarkerPanel extends AbstractPanel {
 
         private Component getTagSelect() {
             TagListModel tagListModel = new TagListModel();
-            tagSelect = new JComboBox(tagListModel);
-            tagSelect.setPreferredSize(new Dimension(200, 25));
+            tagSelect = new JComboBox<>(tagListModel);
+            tagSelect.setPreferredSize(new Dimension(200, 24));
             tagSelect.addPopupMenuListener(new PopupMenuListener() {
                 @Override
                 public void popupMenuWillBecomeVisible(PopupMenuEvent popupMenuEvent) {
@@ -169,8 +168,8 @@ public class NeonmarkerPanel extends AbstractPanel {
         }
 
         private Component getColorSelect() {
-            colorSelect = new JComboBox(ExtensionNeonmarker.palette);
-            colorSelect.setMinimumSize(new Dimension(30, 25));
+            colorSelect = new JComboBox<>(ExtensionNeonmarker.palette);
+            colorSelect.setPreferredSize(new Dimension(100, 24));
             colorSelect.setRenderer(new ColorListRenderer());
             colorSelect.addActionListener(actionEvent -> {
                 selectedColor = (Color) colorSelect.getSelectedItem();
@@ -180,12 +179,12 @@ public class NeonmarkerPanel extends AbstractPanel {
         }
     }
 
-    private class TagListModel implements ComboBoxModel {
-        private List allTags;
+    private class TagListModel implements ComboBoxModel<String> {
+        private List<String> allTags;
         private ArrayList<ListDataListener> listDataListeners;
         private Object selectedItem;
 
-        public TagListModel() {
+        TagListModel() {
             listDataListeners = new ArrayList<>();
             updateTags();
         }
@@ -194,6 +193,7 @@ public class NeonmarkerPanel extends AbstractPanel {
             try {
                 allTags = historyTableModel.getDb().getTableTag().getAllTags();
             } catch (Exception e) {
+                //do nothing
             }
             if (allTags.isEmpty()) {
                 allTags.add("No tags found");
@@ -209,7 +209,7 @@ public class NeonmarkerPanel extends AbstractPanel {
         }
 
         @Override
-        public Object getElementAt(int i) {
+        public String getElementAt(int i) {
             return allTags.get(i);
         }
 
@@ -234,13 +234,14 @@ public class NeonmarkerPanel extends AbstractPanel {
         }
     }
 
-    private class ColorListRenderer extends JLabel implements ListCellRenderer {
+    private class ColorListRenderer extends JLabel implements ListCellRenderer<Color> {
         @Override
-        public Component getListCellRendererComponent(JList jList, Object o, int i, boolean b, boolean b1) {
-            //this fails to color the selected item, but UTF-8 will save us!
-            //setBackground((Color) o);
-            setText(" \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588");
-            setForeground((Color) o);
+        public Component getListCellRendererComponent(JList<? extends Color> jList, Color color, int i, boolean b, boolean b1) {
+            BufferedImage img = new BufferedImage(100, 16, BufferedImage.TYPE_INT_RGB);
+            Graphics graphics = img.createGraphics();
+            graphics.setColor(color);
+            graphics.fillRect(0,0, img.getWidth(), img.getHeight());
+            setIcon(new ImageIcon(img));
             return this;
         }
     }
