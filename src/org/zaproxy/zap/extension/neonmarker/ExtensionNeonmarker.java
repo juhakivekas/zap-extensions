@@ -70,8 +70,8 @@ public class ExtensionNeonmarker extends ExtensionAdaptor {
 
     public void hook(ExtensionHook extensionHook) {
         ExtensionHistory extHistory = (ExtensionHistory) Control.getSingleton().getExtensionLoader().getExtension(ExtensionHistory.NAME);
-        int idColumnIndex = extHistory.getLogPanelHistoryReferenceTable().getModel().getColumnIndex(DefaultHistoryReferencesTableModel.Column.HREF_ID);
-        extHistory.getLogPanelHistoryReferenceTable().setHighlighters(new MarkItemColorHighlighter(extHistory, idColumnIndex));
+        int idColumnIndex = extHistory.getHistoryReferenceTable().getModel().getColumnIndex(DefaultHistoryReferencesTableModel.Column.HREF_ID);
+        extHistory.getHistoryReferenceTable().setHighlighters(new MarkItemColorHighlighter(extHistory, idColumnIndex));
 
         colormap = new ArrayList<ColorMapping>();
 
