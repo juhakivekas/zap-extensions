@@ -53,10 +53,10 @@ public class ExtensionNeonmarker extends ExtensionAdaptor {
             new Color(0xff80ff),
             new Color(0xff80c0),
             //CORPORATE EDITION
-            new Color(0xc0ffff),
-            new Color(0x90c0c0),
-            new Color(0x608080),
-            new Color(0x304040)
+            new Color(0xe0ffff),
+            new Color(0xa8c0c0),
+            new Color(0x708080),
+            new Color(0x384040)
     };
 
     @Override

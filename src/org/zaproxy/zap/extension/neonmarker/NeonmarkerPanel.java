@@ -240,7 +240,7 @@ class NeonmarkerPanel extends AbstractPanel {
             BufferedImage img = new BufferedImage(100, 16, BufferedImage.TYPE_INT_RGB);
             Graphics graphics = img.createGraphics();
             graphics.setColor(color);
-            graphics.fillRect(0,0, img.getWidth(), img.getHeight());
+            graphics.fillRect(0, 0, img.getWidth(), img.getHeight());
             setIcon(new ImageIcon(img));
             return this;
         }
