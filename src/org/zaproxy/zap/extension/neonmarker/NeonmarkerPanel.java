@@ -36,27 +36,12 @@ class NeonmarkerPanel extends AbstractPanel {
     private void initializePanel() {
         setName(Constant.messages.getString("neonmarker.panel.title"));
         setIcon(neonmarkerIcon);
-        setLayout(new GridBagLayout());
-
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.anchor = GridBagConstraints.NORTHWEST;
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.weightx = 1.0;
-        add(getPanelToolbar(), constraints);
-
-        constraints = new GridBagConstraints();
-        constraints.anchor = GridBagConstraints.NORTHWEST;
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridy = 1;
-        constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
+        setLayout(new BorderLayout());
+        add(getPanelToolbar(), BorderLayout.PAGE_START);
 
         colorSelectionPanel = new JPanel();
         colorSelectionPanel.setLayout(new BoxLayout(colorSelectionPanel, BoxLayout.PAGE_AXIS));
-        JScrollPane colorSelectionPanelScrollFrame = new JScrollPane();
-        colorSelectionPanelScrollFrame.setPreferredSize(new Dimension(800, 300));
-        colorSelectionPanelScrollFrame.setViewportView(colorSelectionPanel);
-        add(colorSelectionPanelScrollFrame, constraints);
+        add(new JScrollPane(colorSelectionPanel), BorderLayout.CENTER);
         clearColorSelectionPanel();
     }
 
@@ -66,7 +51,6 @@ class NeonmarkerPanel extends AbstractPanel {
             toolbar.setEnabled(true);
             toolbar.setFloatable(false);
             toolbar.setRollover(true);
-            toolbar.setPreferredSize(new java.awt.Dimension(800, 30));
             toolbar.add(getClearButton());
             toolbar.add(getAddButton());
         }
@@ -89,7 +73,7 @@ class NeonmarkerPanel extends AbstractPanel {
 
     private Component getAddButton() {
         if (addButton == null) {
-            addButton = new JButton(/*make a label?*/);
+            addButton = new JButton();
             addButton.setEnabled(true);
             addButton.setIcon(new ImageIcon(NeonmarkerPanel.class.getResource("/resource/icon/16/103.png")));
             addButton.setToolTipText(Constant.messages.getString("neonmarker.panel.button.add"));
