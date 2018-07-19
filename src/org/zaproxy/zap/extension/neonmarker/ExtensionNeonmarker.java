@@ -127,12 +127,12 @@ public class ExtensionNeonmarker extends ExtensionAdaptor {
     }
 
     static class ColorMapping {
-        private String tag;
-        private Color color;
+        public String tag;
+        public Color color;
 
-        ColorMapping(String tag, Color color) {
-            this.tag = tag;
-            this.color = color;
+        ColorMapping(){
+            this.tag = null;
+            this.color = palette[0];
         }
     }
 }

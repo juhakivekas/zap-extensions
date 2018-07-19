@@ -11,8 +11,8 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 class NeonmarkerPanel extends AbstractPanel {
@@ -40,7 +40,7 @@ class NeonmarkerPanel extends AbstractPanel {
         add(getPanelToolbar(), BorderLayout.PAGE_START);
 
         colorSelectionPanel = new JPanel();
-        colorSelectionPanel.setLayout(new BoxLayout(colorSelectionPanel, BoxLayout.PAGE_AXIS));
+        colorSelectionPanel.setLayout(new GridBagLayout());
         add(new JScrollPane(colorSelectionPanel), BorderLayout.CENTER);
         clearColorSelectionPanel();
     }
@@ -63,10 +63,7 @@ class NeonmarkerPanel extends AbstractPanel {
             clearButton.setEnabled(true);
             clearButton.setIcon(new ImageIcon(NeonmarkerPanel.class.getResource("/resource/icon/fugue/broom.png")));
             clearButton.setToolTipText(Constant.messages.getString("neonmarker.panel.button.clear"));
-            clearButton.addActionListener(actionEvent -> {
-                clearColorSelectionPanel();
-                refreshColormap();
-            });
+            clearButton.addActionListener(actionEvent -> clearColorSelectionPanel());
         }
         return clearButton;
     }
@@ -77,90 +74,98 @@ class NeonmarkerPanel extends AbstractPanel {
             addButton.setEnabled(true);
             addButton.setIcon(new ImageIcon(NeonmarkerPanel.class.getResource("/resource/icon/16/103.png")));
             addButton.setToolTipText(Constant.messages.getString("neonmarker.panel.button.add"));
-            addButton.addActionListener(actionEvent -> colorSelectionPanel.add(new ColorMappingRow()));
+            addButton.addActionListener(actionEvent -> {
+                colormap.add(new ExtensionNeonmarker.ColorMapping());
+                rebuildRows();
+            });
         }
         return addButton;
     }
 
     private void clearColorSelectionPanel() {
-        colorSelectionPanel.removeAll();
-        colorSelectionPanel.add(new ColorMappingRow());
-    }
-
-    private void refreshColormap() {
         colormap.clear();
-        for (Component c : colorSelectionPanel.getComponents()) {
-            if (c instanceof ColorMappingRow) {
-                colormap.add(new ExtensionNeonmarker.ColorMapping(
-                        ((ColorMappingRow) c).selectedTag,
-                        ((ColorMappingRow) c).selectedColor));
-            }
-        }
+        colormap.add(new ExtensionNeonmarker.ColorMapping());
+        rebuildRows();
     }
 
-    private class ColorMappingRow extends JPanel {
-        String selectedTag;
-        Color selectedColor;
-        private JComboBox<String> tagSelect;
-        private JComboBox<Color> colorSelect;
-        private JButton deleteButton;
-
-        ColorMappingRow() {
-            setLayout(new FlowLayout(FlowLayout.LEFT));
-            add(getDeleteButton());
-            add(getTagSelect());
-            add(getColorSelect());
+    private void rebuildRows() {
+        colorSelectionPanel.removeAll();
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.NONE;
+        c.gridy = 0;
+        for(ExtensionNeonmarker.ColorMapping rule: colormap){
+            c.gridx = 0;
+            c.weightx = 0;
+            colorSelectionPanel.add(getColorComboBox(rule), c);
+            c.gridx++;
+            colorSelectionPanel.add(getTagComboBox(rule), c);
+            c.gridx++;
+            colorSelectionPanel.add(getMoveButton(c.gridy, true), c);
+            c.gridx++;
+            colorSelectionPanel.add(getMoveButton(c.gridy, false), c);
+            c.gridx++;
+            colorSelectionPanel.add(getRemoveButton(c.gridy), c);
+            c.gridy++;
         }
+        colorSelectionPanel.validate();
+        colorSelectionPanel.repaint();
+    }
 
-        private Component getDeleteButton() {
-            deleteButton = new JButton("");
-            deleteButton.setPreferredSize(new Dimension(30, 24));
-            deleteButton.setEnabled(true);
-            deleteButton.setIcon(new ImageIcon(NeonmarkerPanel.class.getResource("/resource/icon/16/104.png")));
-            deleteButton.setToolTipText(Constant.messages.getString("neonmarker.panel.mapping.delete"));
-            deleteButton.addActionListener(actionEvent -> {
-                colorSelectionPanel.remove(this);
-                colorSelectionPanel.repaint();
-                refreshColormap();
-            });
-            return deleteButton;
+    private Component getMoveButton(int ruleNumber, boolean up) {
+        JButton move = new JButton(up ? "\u2191" : "\u2193");
+        if((up && ruleNumber == 0) || (!up && ruleNumber == colormap.size() - 1)) {
+            move.setEnabled(false);
         }
+        move.setActionCommand(up ? "up" : "down");
+        move.setToolTipText(Constant.messages.getString("neonmarker.panel.mapping.move"));
+        move.addActionListener(e -> {
+            Collections.swap(colormap, ruleNumber, up ? ruleNumber - 1 : ruleNumber + 1);
+            rebuildRows();
+        });
+        return move;
+    }
 
-        private Component getTagSelect() {
-            TagListModel tagListModel = new TagListModel();
-            tagSelect = new JComboBox<>(tagListModel);
-            tagSelect.setPreferredSize(new Dimension(200, 24));
-            tagSelect.addPopupMenuListener(new PopupMenuListener() {
-                @Override
-                public void popupMenuWillBecomeVisible(PopupMenuEvent popupMenuEvent) {
-                    ((TagListModel) tagSelect.getModel()).updateTags();
-                }
+    private Component getColorComboBox(ExtensionNeonmarker.ColorMapping rule) {
+        JComboBox<Color> colorSelect;
+        colorSelect = new JComboBox<>(ExtensionNeonmarker.palette);
+        colorSelect.setRenderer(new ColorListRenderer());
+        colorSelect.setSelectedItem(rule.color);
+        colorSelect.addActionListener(actionEvent -> rule.color = (Color) colorSelect.getSelectedItem());
+        return colorSelect;
+    }
 
-                @Override
-                public void popupMenuWillBecomeInvisible(PopupMenuEvent popupMenuEvent) {
-                }
+    private Component getTagComboBox(ExtensionNeonmarker.ColorMapping rule) {
+        TagListModel tagListModel = new TagListModel();
+        JComboBox<String> tagSelect = new JComboBox<>(tagListModel);
+        tagSelect.addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent popupMenuEvent) {
+                ((TagListModel) tagSelect.getModel()).updateTags();
+            }
 
-                @Override
-                public void popupMenuCanceled(PopupMenuEvent popupMenuEvent) {
-                }
-            });
-            tagSelect.addActionListener(actionEvent -> {
-                selectedTag = (String) tagSelect.getSelectedItem();
-                refreshColormap();
-            });
-            return tagSelect;
-        }
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent popupMenuEvent) {
+            }
 
-        private Component getColorSelect() {
-            colorSelect = new JComboBox<>(ExtensionNeonmarker.palette);
-            colorSelect.setPreferredSize(new Dimension(100, 24));
-            colorSelect.setRenderer(new ColorListRenderer());
-            colorSelect.addActionListener(actionEvent -> {
-                selectedColor = (Color) colorSelect.getSelectedItem();
-                refreshColormap();
-            });
-            return colorSelect;
-        }
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent popupMenuEvent) {
+            }
+        });
+        tagSelect.addActionListener(actionEvent -> rule.tag = (String) tagSelect.getSelectedItem());
+        return tagSelect;
+    }
+
+    private Component getRemoveButton(int ruleNumber) {
+        JButton remove = new JButton("\u2715");
+        remove.setToolTipText(Constant.messages.getString("neonmarker.panel.mapping.remove"));
+        remove.setActionCommand("remove");
+        remove.addActionListener(e -> {
+            if (colormap.size() <= 1) return;
+            colormap.remove(ruleNumber);
+            rebuildRows();
+        });
+        return remove;
     }
 
     private class TagListModel implements ComboBoxModel<String> {
@@ -180,7 +185,7 @@ class NeonmarkerPanel extends AbstractPanel {
                 //do nothing
             }
             if (allTags.isEmpty()) {
-                allTags.add("No tags found");
+                allTags.add(Constant.messages.getString("neonmarker.panel.mapping.notags"));
             }
             for (ListDataListener l : listDataListeners) {
                 l.contentsChanged(new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, allTags.size() - 1));
@@ -221,11 +226,15 @@ class NeonmarkerPanel extends AbstractPanel {
     private class ColorListRenderer extends JLabel implements ListCellRenderer<Color> {
         @Override
         public Component getListCellRendererComponent(JList<? extends Color> jList, Color color, int i, boolean b, boolean b1) {
-            BufferedImage img = new BufferedImage(100, 16, BufferedImage.TYPE_INT_RGB);
+            setText(" \u2588\u2588\u2588\u2588");
+            setForeground(color);
+            /* If the hack above some day fails, here's a worse-looking more-correct solution
+            BufferedImage img = new BufferedImage(100, 20, BufferedImage.TYPE_INT_RGB);
             Graphics graphics = img.createGraphics();
             graphics.setColor(color);
             graphics.fillRect(0, 0, img.getWidth(), img.getHeight());
             setIcon(new ImageIcon(img));
+            */
             return this;
         }
     }
