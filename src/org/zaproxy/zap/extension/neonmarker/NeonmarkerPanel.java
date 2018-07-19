@@ -91,12 +91,11 @@ class NeonmarkerPanel extends AbstractPanel {
     private void rebuildRows() {
         colorSelectionPanel.removeAll();
         GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.CENTER;
-        c.fill = GridBagConstraints.NONE;
+        c.anchor = GridBagConstraints.LINE_START;
+        c.fill = GridBagConstraints.VERTICAL;
         c.gridy = 0;
         for(ExtensionNeonmarker.ColorMapping rule: colormap){
             c.gridx = 0;
-            c.weightx = 0;
             colorSelectionPanel.add(getColorComboBox(rule), c);
             c.gridx++;
             colorSelectionPanel.add(getTagComboBox(rule), c);
@@ -108,6 +107,9 @@ class NeonmarkerPanel extends AbstractPanel {
             colorSelectionPanel.add(getRemoveButton(c.gridy), c);
             c.gridy++;
         }
+        c.weightx = 1;
+        c.weighty = 1;
+        colorSelectionPanel.add(new JLabel(" "), c);
         colorSelectionPanel.validate();
         colorSelectionPanel.repaint();
     }
@@ -153,6 +155,7 @@ class NeonmarkerPanel extends AbstractPanel {
             }
         });
         tagSelect.addActionListener(actionEvent -> rule.tag = (String) tagSelect.getSelectedItem());
+        tagSelect.setSelectedItem(rule.tag);
         return tagSelect;
     }
 
@@ -168,6 +171,9 @@ class NeonmarkerPanel extends AbstractPanel {
         return remove;
     }
 
+    /**
+     * A list model that dynamically gets all the tags that ZAP has given to any messages in the history
+     */
     private class TagListModel implements ComboBoxModel<String> {
         private List<String> allTags;
         private ArrayList<ListDataListener> listDataListeners;
@@ -223,6 +229,10 @@ class NeonmarkerPanel extends AbstractPanel {
         }
     }
 
+
+    /**
+     * Renderer for JComboBox that makes colours visible in the UI instead of handling them by name or value.
+     */
     private class ColorListRenderer extends JLabel implements ListCellRenderer<Color> {
         @Override
         public Component getListCellRendererComponent(JList<? extends Color> jList, Color color, int i, boolean b, boolean b1) {

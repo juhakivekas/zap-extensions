@@ -76,7 +76,7 @@ public class ExtensionNeonmarker extends ExtensionAdaptor {
         colormap = new ArrayList<>();
 
         ExtensionHookView hookView = extensionHook.getHookView();
-        hookView.addStatusPanel(getNeonmarkerPanel());
+        hookView.addWorkPanel(getNeonmarkerPanel());
     }
 
     private NeonmarkerPanel getNeonmarkerPanel() {
